@@ -1,0 +1,45 @@
+services:
+  db:
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: gnangnon_Undescore83
+      MYSQL_DATABASE: gestion_projet_collaboration
+      MYSQL_USER: gnangnon
+      MYSQL_PASSWORD: _Undescore83
+    ports:
+      - "3307:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+      - ./db-init/dump.sql:/docker-entrypoint-initdb.d/dump.sql
+
+  backend:
+    build:
+      context: ./app-back
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=mysql://gnangnon:_Undescore83@db:3306/gestion_projet_collaboration
+    volumes:
+      - ./app-back:/app
+    depends_on:
+      - db
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  frontend:
+    build:
+      context: ./app-front
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./app-front:/app
+    depends_on:
+      - backend
+
+volumes:
+  db-data:
